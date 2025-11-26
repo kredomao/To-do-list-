@@ -335,11 +335,437 @@
             display: block;
             margin-bottom: 10px;
         }
+        
+        /* ビュー切り替え */
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+        
+        .view-btn {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .view-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .view-btn:hover {
+            background: #e9ecef;
+        }
+        
+        .view-btn.active:hover {
+            background: #5568d3;
+        }
+        
+        /* カレンダー */
+        .calendar-container {
+            display: none;
+        }
+        
+        .calendar-container.active {
+            display: block;
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .calendar-nav {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .calendar-nav:hover {
+            background: #5568d3;
+        }
+        
+        .calendar-month {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin-top: 20px;
+        }
+        
+        .calendar-day-header {
+            text-align: center;
+            font-weight: 600;
+            color: #666;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+        }
+        
+        .calendar-day {
+            aspect-ratio: 1;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: white;
+            position: relative;
+        }
+        
+        .calendar-day:hover {
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+        
+        .calendar-day.other-month {
+            opacity: 0.3;
+            background: #f8f9fa;
+        }
+        
+        .calendar-day.today {
+            border-color: #667eea;
+            background: #e7f3ff;
+            font-weight: 600;
+        }
+        
+        .day-number {
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .day-todos {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-top: 4px;
+        }
+        
+        .day-todo-dot {
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+        }
+        
+        .day-todo-dot.urgent {
+            background: #dc3545;
+        }
+        
+        .day-todo-dot.important {
+            background: #ff9800;
+        }
+        
+        .day-todo-dot.normal {
+            background: #28a745;
+        }
+        
+        .day-todo-item {
+            font-size: 0.7em;
+            padding: 2px 4px;
+            border-radius: 4px;
+            margin-bottom: 2px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            color: white;
+            font-weight: 600;
+            text-align: left;
+        }
+        
+        .day-todo-item.urgent {
+            background: #dc3545;
+        }
+        
+        .day-todo-item.important {
+            background: #ff9800;
+        }
+        
+        .day-todo-item.normal {
+            background: #28a745;
+        }
+        
+        .day-todo-item.category-work {
+            background: #2196F3;
+        }
+        
+        .day-todo-item.category-personal {
+            background: #9C27B0;
+        }
+        
+        .day-todo-item.category-meeting {
+            background: #FF9800;
+        }
+        
+        .day-todo-item.category-other {
+            background: #4CAF50;
+        }
+        
+        .day-todo-count {
+            font-size: 0.7em;
+            color: #666;
+            margin-top: 2px;
+        }
+        
+        /* ローディング */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .loading-overlay.active {
+            display: flex;
+        }
+        
+        .loading-spinner {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* トースト通知 */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            z-index: 3000;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        .toast.active {
+            display: block;
+        }
+        
+        .toast.error {
+            background: #dc3545;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        /* 日付選択モーダル */
+        .date-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .date-modal.active {
+            display: flex;
+        }
+        
+        .date-modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .date-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .date-modal-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .close-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .close-btn:hover {
+            background: #c82333;
+        }
+        
+        .date-todos-list {
+            margin-top: 20px;
+        }
+        
+        .date-todo-item {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .date-todo-item.urgent {
+            border-left: 4px solid #dc3545;
+        }
+        
+        .date-todo-item.important {
+            border-left: 4px solid #ff9800;
+        }
+        
+        .date-todo-item.normal {
+            border-left: 4px solid #28a745;
+        }
+        
+        /* 予定追加フォーム */
+        .event-form {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .event-form-group {
+            margin-bottom: 15px;
+        }
+        
+        .event-form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        
+        .event-form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .event-form input[type="text"],
+        .event-form input[type="time"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .event-form select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+        }
+        
+        .category-option {
+            padding: 5px;
+        }
+        
+        .category-work { background: #e3f2fd; }
+        .category-personal { background: #f3e5f5; }
+        .category-meeting { background: #fff3e0; }
+        .category-other { background: #e8f5e9; }
+        
+        .event-submit-btn {
+            width: 100%;
+            padding: 12px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .event-submit-btn:hover {
+            background: #5568d3;
+        }
+        
+        .time-display {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>📋 Todo List</h1>
+        
+        <!-- ビュー切り替え -->
+        <div class="view-toggle">
+            <button class="view-btn active" onclick="switchView('list', this)">📋 リスト</button>
+            <button class="view-btn" onclick="switchView('calendar', this)">📅 カレンダー</button>
+        </div>
         
         <!-- アラート表示 -->
         {% if alert_todos %}
@@ -386,6 +812,8 @@
             </form>
         </div>
         
+        <!-- リストビュー -->
+        <div id="listView">
         {% if todos %}
         <table>
             <thead>
@@ -411,7 +839,7 @@
                         </form>
                     </td>
                     <td>
-                        <strong>{{ todo.title }}</strong>
+                        <strong>{% if todo.type == 'event' %}📅 予定: {% else %}📋 Todo: {% endif %}{{ todo.title }}</strong>
                     </td>
                     <td>{{ todo.description or '-' }}</td>
                     <td>
@@ -460,6 +888,441 @@
             Todoがありません。上記のフォームから追加してください。
         </div>
         {% endif %}
+        </div>
+        
+        <!-- カレンダービュー -->
+        <div class="calendar-container" id="calendarView">
+            <div class="calendar-header">
+                <button class="calendar-nav" onclick="changeMonth(-1)">← 前月</button>
+                <div class="calendar-month" id="calendarMonth"></div>
+                <button class="calendar-nav" onclick="changeMonth(1)">次月 →</button>
+            </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
+        </div>
+        
+        <!-- ローディングオーバーレイ -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <div>処理中...</div>
+            </div>
+        </div>
+        
+        <!-- トースト通知 -->
+        <div class="toast" id="toast">
+            <div id="toastMessage"></div>
+        </div>
+        
+        <!-- 日付選択モーダル -->
+        <div class="date-modal" id="dateModal">
+            <div class="date-modal-content">
+                <div class="date-modal-header">
+                    <div class="date-modal-title" id="modalDateTitle"></div>
+                    <button class="close-btn" onclick="closeDateModal()">閉じる</button>
+                </div>
+                <!-- 予定追加フォーム -->
+                <div class="event-form" id="eventForm" style="display: none;">
+                    <form action="/add" method="POST" id="eventAddForm">
+                        <input type="hidden" name="type" value="event">
+                        <input type="hidden" name="view" value="calendar">
+                        <input type="hidden" name="start_date" id="eventStartDate">
+                        <input type="hidden" name="deadline" id="eventDeadline">
+                        
+                        <div class="event-form-group">
+                            <label for="eventTitle">予定名 *</label>
+                            <input type="text" id="eventTitle" name="title" placeholder="例: 会議" required>
+                        </div>
+                        
+                        <div class="event-form-row">
+                            <div class="event-form-group">
+                                <label for="eventStartTime">開始時間</label>
+                                <input type="time" id="eventStartTime" name="start_time">
+                            </div>
+                            <div class="event-form-group">
+                                <label for="eventEndTime">終了時間</label>
+                                <input type="time" id="eventEndTime" name="end_time">
+                            </div>
+                        </div>
+                        
+                        <div class="event-form-group">
+                            <label for="eventCategory">カテゴリー（色分け）</label>
+                            <select id="eventCategory" name="category">
+                                <option value="work" class="category-option category-work">💼 仕事</option>
+                                <option value="personal" class="category-option category-personal">👤 個人</option>
+                                <option value="meeting" class="category-option category-meeting">🤝 会議</option>
+                                <option value="other" class="category-option category-other">📌 その他</option>
+                            </select>
+                        </div>
+                        
+                        <button type="submit" class="event-submit-btn">予定を追加</button>
+                    </form>
+                </div>
+                
+                <div>
+                    <button class="btn-add" style="width: 100%; margin-bottom: 20px;" onclick="toggleEventForm()">➕ この日に予定を追加</button>
+                </div>
+                <div class="date-todos-list" id="dateTodosList"></div>
+            </div>
+        </div>
     </div>
+    
+    <script>
+        // カレンダーデータ（サーバーから取得）
+        const todosByDate = {{ todos_by_date | tojson }};
+        let currentDate = new Date();
+        
+        // ビュー切り替え
+        function switchView(view, buttonElement = null) {
+            const listView = document.getElementById('listView');
+            const calendarView = document.getElementById('calendarView');
+            const buttons = document.querySelectorAll('.view-btn');
+            
+            buttons.forEach(btn => btn.classList.remove('active'));
+            
+            if (view === 'list') {
+                listView.style.display = 'block';
+                calendarView.classList.remove('active');
+                if (buttonElement) {
+                    buttonElement.classList.add('active');
+                } else {
+                    buttons[0].classList.add('active');
+                }
+            } else {
+                listView.style.display = 'none';
+                calendarView.classList.add('active');
+                if (buttonElement) {
+                    buttonElement.classList.add('active');
+                } else {
+                    buttons[1].classList.add('active');
+                }
+                renderCalendar();
+            }
+        }
+        
+        // ページ読み込み時にURLパラメータからビューを復元
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const view = urlParams.get('view') || '{{ current_view or "list" }}';
+            
+            if (view === 'calendar') {
+                switchView('calendar');
+            } else {
+                switchView('list');
+            }
+        });
+        
+        // カレンダーを描画
+        function renderCalendar() {
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth();
+            
+            // 月名を表示
+            const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+            document.getElementById('calendarMonth').textContent = `${year}年 ${monthNames[month]}`;
+            
+            // カレンダーグリッドをクリア
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+            
+            // 曜日ヘッダー
+            const dayNames = ['日', '月', '火', '水', '木', '金', '土'];
+            dayNames.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-day-header';
+                header.textContent = day;
+                grid.appendChild(header);
+            });
+            
+            // 月の最初の日
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const startDate = new Date(firstDay);
+            startDate.setDate(startDate.getDate() - startDate.getDay());
+            
+            // 6週間分の日付を生成
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            for (let i = 0; i < 42; i++) {
+                const date = new Date(startDate);
+                date.setDate(startDate.getDate() + i);
+                
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day';
+                
+                // 他の月の日付
+                if (date.getMonth() !== month) {
+                    dayDiv.classList.add('other-month');
+                }
+                
+                // 今日
+                if (date.getTime() === today.getTime()) {
+                    dayDiv.classList.add('today');
+                }
+                
+                // 日付
+                const dayNumber = document.createElement('div');
+                dayNumber.className = 'day-number';
+                dayNumber.textContent = date.getDate();
+                dayDiv.appendChild(dayNumber);
+                
+                // その日のTodoと予定を表示
+                const dateStr = formatDate(date);
+                if (todosByDate[dateStr]) {
+                    const todos = todosByDate[dateStr];
+                    const todoDots = document.createElement('div');
+                    todoDots.className = 'day-todos';
+                    
+                    const activeTodos = todos.filter(t => !t.is_completed);
+                    // 最大3件まで表示
+                    const displayTodos = activeTodos.slice(0, 3);
+                    
+                    displayTodos.forEach(todo => {
+                        const todoItem = document.createElement('div');
+                        const todoType = todo.type || 'todo';
+                        const category = todo.category || '';
+                        
+                        // 予定の場合はカテゴリーで色分け、Todoの場合は重要度で色分け
+                        if (todoType === 'event' && category) {
+                            todoItem.className = `day-todo-item category-${category}`;
+                        } else {
+                            todoItem.className = `day-todo-item ${todo.priority || 'normal'}`;
+                        }
+                        
+                        // タイトルを5文字まで表示（アイコン含む）
+                        const title = todo.title || '';
+                        const icon = todoType === 'event' ? '📅' : '📋';
+                        const displayTitle = title.length > 4 ? title.substring(0, 4) + '...' : title;
+                        todoItem.textContent = `${icon} ${displayTitle}`;
+                        todoItem.title = `${todoType === 'event' ? '予定' : 'Todo'}: ${title}`; // ツールチップで全体を表示
+                        
+                        todoDots.appendChild(todoItem);
+                    });
+                    
+                    // 3件以上ある場合は件数を表示
+                    if (activeTodos.length > 3) {
+                        const count = document.createElement('div');
+                        count.className = 'day-todo-count';
+                        count.textContent = `他${activeTodos.length - 3}件`;
+                        todoDots.appendChild(count);
+                    }
+                    
+                    dayDiv.appendChild(todoDots);
+                }
+                
+                // クリックイベント
+                dayDiv.onclick = () => showDateModal(date, dateStr);
+                
+                grid.appendChild(dayDiv);
+            }
+        }
+        
+        // 月を変更
+        function changeMonth(direction) {
+            currentDate.setMonth(currentDate.getMonth() + direction);
+            renderCalendar();
+        }
+        
+        // 日付をフォーマット（YYYY-MM-DD）
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        // 日付モーダルを表示
+        function showDateModal(date, dateStr) {
+            const modal = document.getElementById('dateModal');
+            const title = document.getElementById('modalDateTitle');
+            const todosList = document.getElementById('dateTodosList');
+            const eventForm = document.getElementById('eventForm');
+            const eventStartDate = document.getElementById('eventStartDate');
+            const eventDeadline = document.getElementById('eventDeadline');
+            
+            const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+            title.textContent = `${date.getFullYear()}年 ${monthNames[date.getMonth()]} ${date.getDate()}日`;
+            
+            // 予定フォームの日付を設定
+            eventStartDate.value = dateStr;
+            eventDeadline.value = dateStr;
+            
+            // 予定フォームを非表示に
+            eventForm.style.display = 'none';
+            
+            // その日のTodoと予定を表示
+            todosList.innerHTML = '';
+            if (todosByDate[dateStr]) {
+                const todos = todosByDate[dateStr];
+                todos.forEach(todo => {
+                    const item = document.createElement('div');
+                    const todoType = todo.type || 'todo';
+                    const category = todo.category || '';
+                    
+                    // カテゴリーに応じた色分け
+                    if (todoType === 'event' && category) {
+                        item.className = `date-todo-item category-${category}`;
+                    } else {
+                        item.className = `date-todo-item ${todo.priority || 'normal'}`;
+                    }
+                    
+                    const info = document.createElement('div');
+                    let timeInfo = '';
+                    if (todoType === 'event' && todo.start_time) {
+                        timeInfo = `<div class="time-display">🕐 ${todo.start_time}`;
+                        if (todo.end_time) {
+                            timeInfo += ` - ${todo.end_time}`;
+                        }
+                        timeInfo += '</div>';
+                    }
+                    
+                    // アイコンを追加
+                    const icon = todoType === 'event' ? '📅' : '📋';
+                    const typeLabel = todoType === 'event' ? '予定' : 'Todo';
+                    
+                    info.innerHTML = `
+                        <strong>${icon} ${typeLabel}: ${todo.title}</strong><br>
+                        <small>${todo.description || ''}</small>
+                        ${timeInfo}
+                    `;
+                    
+                    const actions = document.createElement('div');
+                    actions.className = 'actions';
+                    actions.innerHTML = `
+                        <a href="/edit/${todo.id}">
+                            <button class="icon-btn icon-btn-edit" type="button">✏️</button>
+                        </a>
+                        <form action="/delete/${todo.id}" method="POST" style="display: inline;">
+                            <button class="icon-btn icon-btn-delete" type="submit" onclick="return confirm('本当に削除しますか？')">🗑️</button>
+                        </form>
+                    `;
+                    
+                    item.appendChild(info);
+                    item.appendChild(actions);
+                    todosList.appendChild(item);
+                });
+            } else {
+                todosList.innerHTML = '<p style="text-align: center; color: #999; padding: 20px;">この日の予定はありません</p>';
+            }
+            
+            modal.classList.add('active');
+        }
+        
+        // 予定フォームの表示/非表示
+        function toggleEventForm() {
+            const form = document.getElementById('eventForm');
+            if (form.style.display === 'none') {
+                form.style.display = 'block';
+            } else {
+                form.style.display = 'none';
+            }
+        }
+        
+        // ローディング表示
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('active');
+        }
+        
+        // ローディング非表示
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+        
+        // トースト通知を表示
+        function showToast(message, isError = false) {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            toastMessage.textContent = message;
+            
+            if (isError) {
+                toast.classList.add('error');
+            } else {
+                toast.classList.remove('error');
+            }
+            
+            toast.classList.add('active');
+            
+            // 3秒後に自動で非表示
+            setTimeout(() => {
+                toast.classList.remove('active');
+            }, 3000);
+        }
+        
+        // 予定追加フォームの送信処理
+        document.addEventListener('DOMContentLoaded', function() {
+            const eventForm = document.getElementById('eventAddForm');
+            if (eventForm) {
+                eventForm.addEventListener('submit', function(e) {
+                    showLoading();
+                    // フォームは通常通り送信されるが、ローディングを表示
+                    // カレンダービューを維持するため、viewパラメータは既にhiddenフィールドで設定済み
+                });
+            }
+            
+            // 通常のTodo追加フォームにもローディングを追加
+            const todoForm = document.querySelector('form[action="/add"]');
+            if (todoForm && !todoForm.id) {
+                todoForm.addEventListener('submit', function(e) {
+                    showLoading();
+                });
+            }
+            
+            // 編集フォームにもローディングを追加
+            const editForms = document.querySelectorAll('form[action^="/edit/"]');
+            editForms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    showLoading();
+                });
+            });
+            
+            // 削除フォームにもローディングを追加（確認後）
+            const deleteForms = document.querySelectorAll('form[action^="/delete/"]');
+            deleteForms.forEach(form => {
+                const submitBtn = form.querySelector('button[type="submit"]');
+                if (submitBtn) {
+                    submitBtn.addEventListener('click', function(e) {
+                        // onclickのconfirmが通った場合のみローディングを表示
+                        setTimeout(() => {
+                            if (!e.defaultPrevented) {
+                                showLoading();
+                            }
+                        }, 100);
+                    });
+                }
+            });
+            
+            // 完了切り替えフォームにもローディングを追加
+            const toggleForms = document.querySelectorAll('form[action^="/toggle_complete/"]');
+            toggleForms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    showLoading();
+                });
+            });
+            
+            // フラッシュメッセージを表示
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            showToast('{{ message }}', {{ 'true' if category == "error" else 'false' }});
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+            
+            // ページ読み込み完了時にローディングを非表示
+            hideLoading();
+        });
+        
+        // 日付モーダルを閉じる
+        function closeDateModal() {
+            document.getElementById('dateModal').classList.remove('active');
+        }
+        
+        // モーダル外クリックで閉じる
+        document.getElementById('dateModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeDateModal();
+            }
+        });
+    </script>
 </body>
 </html>

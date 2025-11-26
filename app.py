@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template, request, redirect, url_for, jsonify, flash
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime, date
@@ -6,6 +6,7 @@ import os
 import json
 
 app = Flask(__name__)
+app.secret_key = 'your-secret-key-here'  # フラッシュメッセージ用
 
 # ===== Google sheets authorize ==========
 scope = [
@@ -35,16 +36,29 @@ def ensure_headers():
     try:
         # 1行目を取得
         first_row = sheet.row_values(1)
-        expected_headers = ['id', 'title', 'description', 'deadline', 'completed', 'priority']
+        expected_headers = ['id', 'title', 'description', 'deadline', 'completed', 'priority', 
+                           'start_date', 'start_time', 'end_time', 'category', 'type']
         
         # ヘッダーが正しく設定されていない場合
         if len(first_row) < len(expected_headers) or first_row[:len(expected_headers)] != expected_headers:
-            # ヘッダーを設定
-            sheet.update('A1:F1', [expected_headers])
+            # ヘッダーを設定（既存の列を保持しつつ新しい列を追加）
+            current_headers = first_row if first_row else []
+            # 不足している列を追加
+            for i, header in enumerate(expected_headers):
+                if i >= len(current_headers) or current_headers[i] != header:
+                    # 列を追加または更新
+                    if i < len(current_headers):
+                        sheet.update_cell(1, i + 1, header)
+                    else:
+                        # 新しい列を追加
+                        col_letter = chr(65 + i)  # A, B, C...
+                        sheet.update(f'{col_letter}1', [[header]])
             print("ヘッダーを設定しました")
     except Exception as e:
         # エラーが発生した場合もヘッダーを設定
-        sheet.update('A1:F1', [['id', 'title', 'description', 'deadline', 'completed', 'priority']])
+        expected_headers = [['id', 'title', 'description', 'deadline', 'completed', 'priority', 
+                            'start_date', 'start_time', 'end_time', 'category', 'type']]
+        sheet.update('A1:K1', expected_headers)
         print(f"ヘッダー設定中にエラー: {e}")
 
 
@@ -94,15 +108,28 @@ def get_next_id():
 @app.route("/")
 def index():
     try:
-        todos = sheet.get_all_records()
+        all_items = sheet.get_all_records()
         # idが空の場合は除外
-        todos = [todo for todo in todos if todo.get('id')]
+        all_items = [item for item in all_items if item.get('id')]
+        
+        # Todoと予定を分離
+        todos = []
+        events = []
+        
+        for item in all_items:
+            item_type = item.get('type', 'todo')
+            if item_type == 'event':
+                events.append(item)
+            else:
+                todos.append(item)
         
         # 各Todoに期日までの日数と重要度を追加
         for todo in todos:
             days = calculate_days_until_deadline(todo.get('deadline', ''))
             todo['days_until'] = days
-            todo['priority'] = get_priority(days)
+            # 重要度が設定されていない場合は自動計算
+            if not todo.get('priority'):
+                todo['priority'] = get_priority(days)
             # completedが文字列の場合は変換
             completed = todo.get('completed', '').lower()
             todo['is_completed'] = completed in ['true', '1', 'yes', '完了']
@@ -116,12 +143,34 @@ def index():
         # エラーが発生した場合は空のリストを返す
         print(f"エラー: {e}")
         todos = []
+        events = []
     
-    # アラート用のTodo（3日以内）を取得
+    # アラート用のTodo（3日以内）を取得（予定は除外）
     alert_todos = [todo for todo in todos if todo.get('days_until') is not None 
                    and 0 <= todo.get('days_until') <= 3 and not todo.get('is_completed')]
     
-    return render_template("index.html", todos=todos, alert_todos=alert_todos)
+    # カレンダー用：日付ごとにTodoと予定をグループ化
+    todos_by_date = {}
+    # Todoを追加
+    for todo in todos:
+        deadline = todo.get('deadline', '')
+        if deadline:
+            if deadline not in todos_by_date:
+                todos_by_date[deadline] = []
+            todos_by_date[deadline].append(todo)
+    # 予定を追加
+    for event in events:
+        start_date = event.get('start_date', '') or event.get('deadline', '')
+        if start_date:
+            if start_date not in todos_by_date:
+                todos_by_date[start_date] = []
+            todos_by_date[start_date].append(event)
+    
+    # URLパラメータからビューを取得
+    view = request.args.get('view', 'list')
+    
+    return render_template("index.html", todos=todos, alert_todos=alert_todos, 
+                         todos_by_date=todos_by_date, current_view=view)
 
 
 @app.route("/add", methods=["POST"])
@@ -130,23 +179,52 @@ def add():
     desc = request.form.get("desc", "").strip()
     deadline = request.form.get("deadline", "").strip()
     priority = request.form.get("priority", "").strip()
+    start_date = request.form.get("start_date", "").strip()
+    start_time = request.form.get("start_time", "").strip()
+    end_time = request.form.get("end_time", "").strip()
+    category = request.form.get("category", "").strip()
+    item_type = request.form.get("type", "todo").strip()  # 'todo' or 'event'
     
     if not title:
         return redirect(url_for("index"))
     
-    # 重要度が選択されていない場合は自動計算
-    if not priority:
-        days = calculate_days_until_deadline(deadline)
-        priority = get_priority(days)
-    
-    # 重要度の値が正しいか確認
-    if priority not in ['urgent', 'important', 'normal']:
-        days = calculate_days_until_deadline(deadline)
-        priority = get_priority(days)
-    
     next_id = get_next_id()
+    
+    # 予定の場合
+    if item_type == 'event':
+        # 予定の場合はstart_dateをdeadlineとしても使用（カレンダー表示用）
+        if not deadline and start_date:
+            deadline = start_date
+        if not priority:
+            priority = 'normal'
+    else:
+        # Todoの場合
+        # 重要度が選択されていない場合は自動計算
+        if not priority:
+            days = calculate_days_until_deadline(deadline)
+            priority = get_priority(days)
+        
+        # 重要度の値が正しいか確認
+        if priority not in ['urgent', 'important', 'normal']:
+            days = calculate_days_until_deadline(deadline)
+            priority = get_priority(days)
+    
     # 新規追加時は未完了
-    sheet.append_row([next_id, title, desc, deadline, 'FALSE', priority])
+    # [id, title, description, deadline, completed, priority, start_date, start_time, end_time, category, type]
+    sheet.append_row([next_id, title, desc, deadline, 'FALSE', priority, 
+                     start_date, start_time, end_time, category, item_type])
+    
+    # 成功メッセージをフラッシュ（JavaScriptで表示）
+    if item_type == 'event':
+        flash('予定を追加できました！', 'success')
+    else:
+        flash('Todoを追加できました！', 'success')
+    
+    # カレンダーから追加した場合はカレンダービューを維持
+    view = request.form.get("view", "list")
+    if view == "calendar":
+        return redirect(url_for("index") + "?view=calendar")
+    
     return redirect(url_for("index"))
 
 
@@ -158,15 +236,28 @@ def edit(todo_id):
             desc = request.form.get("desc", "").strip()
             deadline = request.form.get("deadline", "").strip()
             priority = request.form.get("priority", "").strip()
+            start_date = request.form.get("start_date", "").strip()
+            start_time = request.form.get("start_time", "").strip()
+            end_time = request.form.get("end_time", "").strip()
+            category = request.form.get("category", "").strip()
+            item_type = request.form.get("type", "todo").strip()
             
             # 該当する行を検索して更新
             todos = sheet.get_all_records()
             for i, todo in enumerate(todos, start=2):  # 2行目から開始（1行目はヘッダー）
                 if str(todo.get('id', '')) == str(todo_id):
-                    # 重要度が選択されていない場合は自動計算
-                    if not priority or priority not in ['urgent', 'important', 'normal']:
-                        days = calculate_days_until_deadline(deadline)
-                        priority = get_priority(days)
+                    # 予定の場合
+                    if item_type == 'event':
+                        if not deadline and start_date:
+                            deadline = start_date
+                        if not priority:
+                            priority = 'normal'
+                    else:
+                        # Todoの場合：重要度が選択されていない場合は自動計算
+                        if not priority or priority not in ['urgent', 'important', 'normal']:
+                            days = calculate_days_until_deadline(deadline)
+                            priority = get_priority(days)
+                    
                     # 既存の完了状態を保持
                     completed = todo.get('completed', 'FALSE')
                     
@@ -175,8 +266,14 @@ def edit(todo_id):
                     sheet.update_cell(i, 4, deadline)    # deadline列
                     sheet.update_cell(i, 5, completed)   # completed列（保持）
                     sheet.update_cell(i, 6, priority)    # priority列
+                    sheet.update_cell(i, 7, start_date)  # start_date列
+                    sheet.update_cell(i, 8, start_time) # start_time列
+                    sheet.update_cell(i, 9, end_time)   # end_time列
+                    sheet.update_cell(i, 10, category)  # category列
+                    sheet.update_cell(i, 11, item_type) # type列
                     break
             
+            flash('更新しました！', 'success')
             return redirect(url_for("index"))
         
         # GETリクエスト: 編集フォームを表示
@@ -219,9 +316,11 @@ def delete(todo_id):
         for i, todo in enumerate(todos, start=2):  # 2行目から開始
             if str(todo.get('id', '')) == str(todo_id):
                 sheet.delete_rows(i)
+                flash('削除しました！', 'success')
                 break
     except (IndexError, Exception) as e:
         print(f"削除エラー: {e}")
+        flash('削除に失敗しました', 'error')
     
     return redirect(url_for("index"))
 

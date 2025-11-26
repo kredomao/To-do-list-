@@ -46,6 +46,7 @@
         
         input[type="text"],
         input[type="date"],
+        input[type="time"],
         select {
             width: 100%;
             padding: 12px;
@@ -58,9 +59,24 @@
         
         input[type="text"]:focus,
         input[type="date"]:focus,
+        input[type="time"]:focus,
         select:focus {
             outline: none;
             border-color: #667eea;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .event-fields {
+            display: none;
+        }
+        
+        .event-fields.active {
+            display: block;
         }
         
         .button-group {
@@ -108,6 +124,8 @@
         <h1>✏️ Todo編集</h1>
         
         <form action="/edit/{{ todo.id }}" method="POST">
+            <input type="hidden" name="type" id="itemType" value="{{ todo.type or 'todo' }}">
+            
             <div class="form-group">
                 <label for="title">タイトル</label>
                 <input type="text" id="title" name="title" value="{{ todo.title }}" required>
@@ -118,19 +136,75 @@
                 <input type="text" id="desc" name="desc" value="{{ todo.description or '' }}">
             </div>
             
-            <div class="form-group">
-                <label for="deadline">期日</label>
-                <input type="date" id="deadline" name="deadline" value="{{ todo.deadline or '' }}">
+            <!-- Todo用フィールド -->
+            <div class="todo-fields" id="todoFields">
+                <div class="form-group">
+                    <label for="deadline">期日</label>
+                    <input type="date" id="deadline" name="deadline" value="{{ todo.deadline or '' }}">
+                </div>
+                
+                <div class="form-group">
+                    <label for="priority">重要度</label>
+                    <select id="priority" name="priority">
+                        <option value="urgent" {% if todo.priority == 'urgent' %}selected{% endif %}>締め切り間近</option>
+                        <option value="important" {% if todo.priority == 'important' %}selected{% endif %}>急ぎでないけど重要</option>
+                        <option value="normal" {% if todo.priority == 'normal' %}selected{% endif %}>まだ余裕あり</option>
+                    </select>
+                </div>
             </div>
             
-            <div class="form-group">
-                <label for="priority">重要度</label>
-                <select id="priority" name="priority">
-                    <option value="urgent" {% if todo.priority == 'urgent' %}selected{% endif %}>締め切り間近</option>
-                    <option value="important" {% if todo.priority == 'important' %}selected{% endif %}>急ぎでないけど重要</option>
-                    <option value="normal" {% if todo.priority == 'normal' %}selected{% endif %}>まだ余裕あり</option>
-                </select>
+            <!-- 予定用フィールド -->
+            <div class="event-fields" id="eventFields">
+                <div class="form-group">
+                    <label for="start_date">日付</label>
+                    <input type="date" id="start_date" name="start_date" value="{{ todo.start_date or todo.deadline or '' }}">
+                    <input type="hidden" id="deadline" name="deadline" value="{{ todo.deadline or todo.start_date or '' }}">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="start_time">開始時間</label>
+                        <input type="time" id="start_time" name="start_time" value="{{ todo.start_time or '' }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="end_time">終了時間</label>
+                        <input type="time" id="end_time" name="end_time" value="{{ todo.end_time or '' }}">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="category">カテゴリー（色分け）</label>
+                    <select id="category" name="category">
+                        <option value="work" {% if todo.category == 'work' %}selected{% endif %}>💼 仕事</option>
+                        <option value="personal" {% if todo.category == 'personal' %}selected{% endif %}>👤 個人</option>
+                        <option value="meeting" {% if todo.category == 'meeting' %}selected{% endif %}>🤝 会議</option>
+                        <option value="other" {% if todo.category == 'other' %}selected{% endif %}>📌 その他</option>
+                    </select>
+                </div>
             </div>
+            
+            <script>
+                // タイプに応じてフィールドを表示/非表示
+                const itemType = '{{ todo.type or "todo" }}';
+                const todoFields = document.getElementById('todoFields');
+                const eventFields = document.getElementById('eventFields');
+                const startDateInput = document.getElementById('start_date');
+                const deadlineInput = document.getElementById('deadline');
+                
+                if (itemType === 'event') {
+                    todoFields.style.display = 'none';
+                    eventFields.classList.add('active');
+                    // 予定の場合はstart_dateをdeadlineにも設定
+                    if (startDateInput && deadlineInput) {
+                        startDateInput.addEventListener('change', function() {
+                            deadlineInput.value = this.value;
+                        });
+                    }
+                } else {
+                    todoFields.style.display = 'block';
+                    eventFields.classList.remove('active');
+                }
+            </script>
             
             <div class="button-group">
                 <button type="submit" class="btn-primary">更新</button>
