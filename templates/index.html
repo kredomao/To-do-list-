@@ -19,7 +19,7 @@
         }
         
         .container {
-            max-width: 900px;
+            max-width: 1000px;
             margin: 0 auto;
             background: white;
             border-radius: 12px;
@@ -32,6 +32,37 @@
             margin-bottom: 30px;
             text-align: center;
             font-size: 2.5em;
+        }
+        
+        /* アラート表示 */
+        .alert {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .alert-icon {
+            font-size: 1.5em;
+        }
+        
+        .alert-content {
+            flex: 1;
+        }
+        
+        .alert-title {
+            font-weight: 600;
+            color: #856404;
+            margin-bottom: 5px;
+        }
+        
+        .alert-list {
+            color: #856404;
+            font-size: 0.9em;
         }
         
         .form-container {
@@ -70,9 +101,49 @@
         
         .form-row {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr auto;
+            grid-template-columns: 1fr 1fr 1fr 1fr auto;
             gap: 10px;
             align-items: end;
+        }
+        
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            background: white;
+            cursor: pointer;
+        }
+        
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .priority-option-urgent {
+            background: #fff5f5;
+        }
+        
+        .priority-option-important {
+            background: #fff8f0;
+        }
+        
+        .priority-option-normal {
+            background: #f0fff4;
+        }
+        
+        .btn-add {
+            background: #667eea;
+            color: white;
+            font-size: 24px;
+            padding: 12px 20px;
+            min-width: 50px;
+        }
+        
+        .btn-add:hover {
+            background: #5568d3;
         }
         
         button {
@@ -107,6 +178,42 @@
             background: #218838;
         }
         
+        /* アイコンボタン */
+        .icon-btn {
+            background: none;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            font-size: 20px;
+            border-radius: 4px;
+            transition: background 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+        }
+        
+        .icon-btn:hover {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        .icon-btn-edit {
+            color: #28a745;
+        }
+        
+        .icon-btn-edit:hover {
+            background: rgba(40, 167, 69, 0.1);
+        }
+        
+        .icon-btn-delete {
+            color: #dc3545;
+        }
+        
+        .icon-btn-delete:hover {
+            background: rgba(220, 53, 69, 0.1);
+        }
+        
         table {
             width: 100%;
             border-collapse: collapse;
@@ -130,9 +237,90 @@
             background: #f8f9fa;
         }
         
+        /* 重要度による色分け */
+        .priority-urgent {
+            border-left: 5px solid #dc3545;
+            background: #fff5f5;
+        }
+        
+        .priority-important {
+            border-left: 5px solid #ff9800;
+            background: #fff8f0;
+        }
+        
+        .priority-normal {
+            border-left: 5px solid #28a745;
+            background: #f0fff4;
+        }
+        
+        /* 完了状態 */
+        .completed {
+            opacity: 0.6;
+        }
+        
+        .completed td {
+            text-decoration: line-through;
+            color: #999;
+        }
+        
+        /* チェックボックス */
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            accent-color: #28a745;
+        }
+        
+        .priority-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        
+        .badge-urgent {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .badge-important {
+            background: #ff9800;
+            color: white;
+        }
+        
+        .badge-normal {
+            background: #28a745;
+            color: white;
+        }
+        
+        .days-info {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .days-urgent {
+            color: #dc3545;
+            font-weight: 600;
+        }
+        
+        .days-important {
+            color: #ff9800;
+            font-weight: 600;
+        }
+        
         .actions {
             display: flex;
             gap: 10px;
+            align-items: center;
         }
         
         .empty-state {
@@ -153,6 +341,22 @@
     <div class="container">
         <h1>📋 Todo List</h1>
         
+        <!-- アラート表示 -->
+        {% if alert_todos %}
+        <div class="alert">
+            <div class="alert-icon">⚠️</div>
+            <div class="alert-content">
+                <div class="alert-title">期日が迫っています！</div>
+                <div class="alert-list">
+                    {% for todo in alert_todos %}
+                    「{{ todo.title }}」{% if todo.days_until == 0 %}（今日が期日）{% elif todo.days_until < 0 %}（期限切れ）{% else %}（あと{{ todo.days_until }}日）{% endif %}
+                    {% if not loop.last %}、{% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
         <div class="form-container">
             <form action="/add" method="POST">
                 <div class="form-row">
@@ -168,7 +372,16 @@
                         <label for="deadline">期日</label>
                         <input type="date" id="deadline" name="deadline">
                     </div>
-                    <button type="submit">追加</button>
+                    <div class="form-group">
+                        <label for="priority">重要度</label>
+                        <select id="priority" name="priority">
+                            <option value="">自動判定</option>
+                            <option value="urgent" class="priority-option-urgent">締め切り間近</option>
+                            <option value="important" class="priority-option-important">急ぎでないけど重要</option>
+                            <option value="normal" class="priority-option-normal">まだ余裕あり</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-add" title="追加">➕</button>
                 </div>
             </form>
         </div>
@@ -177,25 +390,64 @@
         <table>
             <thead>
                 <tr>
+                    <th>完了</th>
                     <th>タイトル</th>
                     <th>内容</th>
                     <th>期日</th>
+                    <th>重要度</th>
                     <th>操作</th>
                 </tr>
             </thead>
             <tbody>
                 {% for todo in todos %}
-                <tr>
-                    <td><strong>{{ todo.title }}</strong></td>
+                <tr class="priority-{{ todo.priority }} {% if todo.is_completed %}completed{% endif %}">
+                    <td>
+                        <form action="/toggle_complete/{{ todo.id }}" method="POST" style="display: inline;">
+                            <div class="checkbox-container">
+                                <input type="checkbox" 
+                                       {% if todo.is_completed %}checked{% endif %}
+                                       onchange="this.form.submit()">
+                            </div>
+                        </form>
+                    </td>
+                    <td>
+                        <strong>{{ todo.title }}</strong>
+                    </td>
                     <td>{{ todo.description or '-' }}</td>
-                    <td>{{ todo.deadline or '-' }}</td>
+                    <td>
+                        {{ todo.deadline or '-' }}
+                        {% if todo.days_until is not none %}
+                        <div class="days-info {% if todo.priority == 'urgent' %}days-urgent{% elif todo.priority == 'important' %}days-important{% endif %}">
+                            {% if todo.days_until < 0 %}
+                                （期限切れ {{ -todo.days_until }}日経過）
+                            {% elif todo.days_until == 0 %}
+                                （今日が期日）
+                            {% else %}
+                                （あと{{ todo.days_until }}日）
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <span class="priority-badge badge-{{ todo.priority }}">
+                            {% if todo.priority == 'urgent' %}
+                                締め切り間近
+                            {% elif todo.priority == 'important' %}
+                                急ぎでないけど重要
+                            {% else %}
+                                まだ余裕あり
+                            {% endif %}
+                        </span>
+                    </td>
                     <td>
                         <div class="actions">
-                            <a href="/edit/{{ todo.id }}">
-                                <button class="btn-edit" type="button">編集</button>
+                            <a href="/edit/{{ todo.id }}" title="編集">
+                                <button class="icon-btn icon-btn-edit" type="button">✏️</button>
                             </a>
                             <form action="/delete/{{ todo.id }}" method="POST" style="display: inline;">
-                                <button class="btn-danger" type="submit" onclick="return confirm('本当に削除しますか？')">削除</button>
+                                <button class="icon-btn icon-btn-delete" type="submit" 
+                                        onclick="return confirm('本当に削除しますか？')" 
+                                        title="削除">🗑️</button>
                             </form>
                         </div>
                     </td>
@@ -211,4 +463,3 @@
     </div>
 </body>
 </html>
-

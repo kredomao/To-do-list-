@@ -45,17 +45,20 @@
         }
         
         input[type="text"],
-        input[type="date"] {
+        input[type="date"],
+        select {
             width: 100%;
             padding: 12px;
             border: 2px solid #ddd;
             border-radius: 6px;
             font-size: 16px;
             transition: border-color 0.3s;
+            background: white;
         }
         
         input[type="text"]:focus,
-        input[type="date"]:focus {
+        input[type="date"]:focus,
+        select:focus {
             outline: none;
             border-color: #667eea;
         }
@@ -118,6 +121,15 @@
             <div class="form-group">
                 <label for="deadline">期日</label>
                 <input type="date" id="deadline" name="deadline" value="{{ todo.deadline or '' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="priority">重要度</label>
+                <select id="priority" name="priority">
+                    <option value="urgent" {% if todo.priority == 'urgent' %}selected{% endif %}>締め切り間近</option>
+                    <option value="important" {% if todo.priority == 'important' %}selected{% endif %}>急ぎでないけど重要</option>
+                    <option value="normal" {% if todo.priority == 'normal' %}selected{% endif %}>まだ余裕あり</option>
+                </select>
             </div>
             
             <div class="button-group">
